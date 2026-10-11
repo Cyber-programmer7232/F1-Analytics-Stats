@@ -10,7 +10,7 @@ A Streamlit app with one mode per F1 project idea, built one mode at a time.
 | 4. All-time stats | jolpica-f1 | ✅ |
 | 5. Race lap times | FastF1 | ✅ |
 | 6. Qualifying head-to-head | FastF1 | ✅ |
-| 7. Tyre strategy | FastF1 | planned |
+| 7. Tyre strategy | FastF1 | ✅ |
 | 8. Season dashboard | both | planned |
 | Player comparison (Poisson & regression) | both | planned |
 
