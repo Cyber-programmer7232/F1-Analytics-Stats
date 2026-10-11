@@ -1,0 +1,30 @@
+"""F1 Analytics: one app, many modes. Run with `streamlit run app.py`."""
+import streamlit as st
+
+from f1app.modes import next_race
+
+st.set_page_config(page_title="F1 Analytics", page_icon="🏎️", layout="wide")
+
+# Each mode is (label, render function or None while it is still being built).
+MODES = {
+    "1. Next race": next_race.render,
+    "2. Standings": None,
+    "3. Points race": None,
+    "4. All-time stats": None,
+    "5. Race lap times": None,
+    "6. Qualifying head-to-head": None,
+    "7. Tyre strategy": None,
+    "8. Season dashboard": None,
+    "Player comparison (Poisson & regression)": None,
+}
+
+st.sidebar.title("🏎️ F1 Analytics")
+mode = st.sidebar.radio("Mode", list(MODES))
+st.sidebar.caption("Data: jolpica-f1 and FastF1. Unofficial, not affiliated with Formula 1.")
+
+render = MODES[mode]
+if render:
+    render()
+else:
+    st.header(mode)
+    st.info("Coming soon. This mode hasn't been built yet.")
