@@ -75,3 +75,30 @@ def standings(season: str, kind: str, round_: int | None = None) -> dict | None:
         result[key] = result[key] + more[0][key]
         offset += len(more[0][key])
     return result
+
+
+def all_races(path: str, on_page=None) -> list[dict]:
+    """Return every race for a results-style `path` (e.g. "results/1"),
+    paging through jolpica's 100-row limit. Races split across two pages
+    are merged. `on_page(done, total)` is called after each page."""
+    merged: dict[tuple, dict] = {}
+    offset, total = 0, None
+    while total is None or offset < total:
+        page = get(path, offset=offset)
+        total = int(page.get("total", 0))
+        races_ = page["RaceTable"]["Races"]
+        rows = 0
+        for race in races_:
+            key = (race["season"], race["round"])
+            results = race.get("Results", [])
+            rows += len(results)
+            if key in merged:
+                merged[key]["Results"] = merged[key]["Results"] + results
+            else:
+                merged[key] = race
+        if on_page:
+            on_page(min(offset + max(rows, 1), total), total)
+        if rows == 0:
+            break
+        offset += rows
+    return list(merged.values())
