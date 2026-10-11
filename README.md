@@ -6,7 +6,7 @@ A Streamlit app with one mode per F1 project idea, built one mode at a time.
 |---|---|---|
 | 1. Next race | jolpica-f1 | ✅ |
 | 2. Standings | jolpica-f1 | ✅ |
-| 3. Points race | jolpica-f1 | planned |
+| 3. Points race | jolpica-f1 | ✅ |
 | 4. All-time stats | jolpica-f1 | planned |
 | 5. Race lap times | FastF1 | planned |
 | 6. Qualifying head-to-head | FastF1 | planned |

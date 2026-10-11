@@ -1,3 +1,4 @@
 streamlit>=1.50
 pandas>=2.2
 requests>=2.32
+altair>=5
