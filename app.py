@@ -1,7 +1,7 @@
 """F1 Analytics: one app, many modes. Run with `streamlit run app.py`."""
 import streamlit as st
 
-from f1app.modes import all_time, dashboard, lap_times, next_race, points_race, quali_h2h, standings, tyre_strategy
+from f1app.modes import all_time, compare, dashboard, lap_times, next_race, points_race, quali_h2h, standings, tyre_strategy
 
 st.set_page_config(page_title="F1 Analytics", page_icon="🏎️", layout="wide")
 
@@ -15,7 +15,7 @@ MODES = {
     "6. Qualifying head-to-head": quali_h2h.render,
     "7. Tyre strategy": tyre_strategy.render,
     "8. Season dashboard": dashboard.render,
-    "Player comparison (Poisson & regression)": None,
+    "9. Player comparison": compare.render,
 }
 
 st.sidebar.title("🏎️ F1 Analytics")

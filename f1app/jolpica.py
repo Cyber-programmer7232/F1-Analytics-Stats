@@ -102,3 +102,8 @@ def all_races(path: str, on_page=None) -> list[dict]:
             break
         offset += rows
     return list(merged.values())
+
+
+def driver_results(driver_id: str) -> list[dict]:
+    """Every race result of one driver across their career."""
+    return all_races(f"drivers/{driver_id}/results")

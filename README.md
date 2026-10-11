@@ -12,7 +12,7 @@ A Streamlit app with one mode per F1 project idea, built one mode at a time.
 | 6. Qualifying head-to-head | FastF1 | ✅ |
 | 7. Tyre strategy | FastF1 | ✅ |
 | 8. Season dashboard | both | ✅ |
-| Player comparison (Poisson & regression) | both | planned |
+| 9. Player comparison (Poisson & regression) | jolpica-f1 | ✅ |
 
 ## Run it
 
