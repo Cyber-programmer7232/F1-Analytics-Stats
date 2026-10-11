@@ -53,3 +53,25 @@ def get(path: str, limit: int = 100, offset: int = 0) -> dict:
 def races(path: str) -> list[dict]:
     """Return the Races list for a schedule/results path."""
     return get(path)["RaceTable"]["Races"]
+
+
+def standings(season: str, kind: str, round_: int | None = None) -> dict | None:
+    """Return one standings list ({season, round, DriverStandings|ConstructorStandings})
+    with every entry, paging past jolpica's 100-row limit. `kind` is "driver" or
+    "constructor". Returns None when the season has no standings of that kind."""
+    path = f"{season}/{round_}/{kind}standings" if round_ else f"{season}/{kind}standings"
+    key = "DriverStandings" if kind == "driver" else "ConstructorStandings"
+    page = get(path)
+    lists = page["StandingsTable"]["StandingsLists"]
+    if not lists:
+        return None
+    result = lists[0]
+    total = int(page.get("total", 0))
+    offset = len(result[key])
+    while offset < total:
+        more = get(path, offset=offset)["StandingsTable"]["StandingsLists"]
+        if not more or not more[0][key]:
+            break
+        result[key] = result[key] + more[0][key]
+        offset += len(more[0][key])
+    return result
