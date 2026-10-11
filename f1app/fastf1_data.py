@@ -68,3 +68,73 @@ def race_laps(year: int, round_number: int, session: str = "R") -> tuple[pd.Data
         }
     ).sort_values("Position", na_position="last").reset_index(drop=True)
     return out, results
+
+
+def quali_sessions(event_format: str) -> dict[str, str]:
+    """Qualifying sessions available at a weekend, label -> FastF1 session name."""
+    sessions = {"Qualifying": "Qualifying"}
+    fmt = str(event_format).lower()
+    if fmt == "sprint_shootout":  # 2023
+        sessions["Sprint Shootout"] = "Sprint Shootout"
+    elif fmt == "sprint_qualifying":  # 2024 onwards
+        sessions["Sprint Qualifying"] = "Sprint Qualifying"
+    return sessions
+
+
+@st.cache_resource(show_spinner=False, max_entries=4)
+def _telemetry_session(year: int, round_number: int, session: str):
+    s = fastf1.get_session(year, round_number, session)
+    s.load(laps=True, telemetry=True, weather=False, messages=False)
+    return s
+
+
+def quali_results(year: int, round_number: int, session: str) -> pd.DataFrame:
+    """Abbreviation, FullName, TeamName, Color, Position, Best (fastest lap in seconds)."""
+    s = _telemetry_session(year, round_number, session)
+    res = pd.DataFrame(s.results)
+    best = s.laps.groupby("Driver")["LapTime"].min().dt.total_seconds()
+    out = pd.DataFrame(
+        {
+            "Abbreviation": res["Abbreviation"],
+            "FullName": res["FullName"],
+            "TeamName": res["TeamName"],
+            "Color": "#" + res["TeamColor"].fillna("888888").replace("", "888888").astype(str),
+            "Position": pd.to_numeric(res["Position"], errors="coerce").astype("Int64"),
+        }
+    )
+    out["Best"] = out["Abbreviation"].map(best)
+    return out.sort_values("Position", na_position="last").reset_index(drop=True)
+
+
+def fastest_lap_telemetry(year: int, round_number: int, session: str, driver: str) -> tuple[dict, pd.DataFrame]:
+    """Telemetry of `driver`'s fastest lap: Distance, Time (s), Speed, Throttle,
+    Brake (0/1), Gear, X, Y. Also returns lap info (LapSeconds, Compound)."""
+    s = _telemetry_session(year, round_number, session)
+    lap = s.laps.pick_drivers(driver).pick_fastest()
+    if lap is None or pd.isna(lap.get("LapTime")):
+        raise ValueError(f"{driver} has no timed lap in this session")
+    tel = lap.get_telemetry()
+    out = pd.DataFrame(
+        {
+            "Distance": tel["Distance"].to_numpy(),
+            "Time": tel["Time"].dt.total_seconds().to_numpy(),
+            "Speed": tel["Speed"].to_numpy(),
+            "Throttle": tel["Throttle"].to_numpy(),
+            "Brake": tel["Brake"].astype(float).to_numpy(),
+            "Gear": tel["nGear"].to_numpy(),
+            "X": tel["X"].to_numpy(),
+            "Y": tel["Y"].to_numpy(),
+        }
+    )
+    info = {"LapSeconds": lap["LapTime"].total_seconds(), "Compound": lap.get("Compound")}
+    return info, out
+
+
+def corners(year: int, round_number: int, session: str) -> pd.DataFrame:
+    """Corner numbers and their distance from the start line, if FastF1 has them."""
+    try:
+        ci = _telemetry_session(year, round_number, session).get_circuit_info()
+        c = ci.corners
+        return pd.DataFrame({"Corner": c["Number"].astype(str) + c["Letter"].fillna(""), "Distance": c["Distance"]})
+    except Exception:
+        return pd.DataFrame(columns=["Corner", "Distance"])
